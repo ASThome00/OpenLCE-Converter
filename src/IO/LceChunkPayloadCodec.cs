@@ -11,6 +11,8 @@ public static class LceChunkPayloadCodec
     private const int CompressedChunkSectionHeight = 128;
     private const int BlocksPerSection = CompressedChunkSectionHeight * 16 * 16;
     private const int NibblesPerSection = BlocksPerSection / 2;
+    private const int FullChunkBlocks = 256 * 16 * 16;
+    private const int FullChunkNibbles = FullChunkBlocks / 2;
 
     private const ushort IndexTypeMask = 0x0003;
     private const ushort IndexType1Bit = 0x0000;
@@ -51,17 +53,17 @@ public static class LceChunkPayloadCodec
         WriteInt64BigEndian(ms, level.Get<NbtLong>("LastUpdate")?.Value ?? 0);
         WriteInt64BigEndian(ms, level.Get<NbtLong>("InhabitedTime")?.Value ?? 0);
 
-        WriteCompressedTileStorage(ms, blocks);
-        WriteEmptyCompressedTileStorage(ms);
+        WriteCompressedTileStorage(ms, ExtractLowerBlockSection(blocks));
+        WriteCompressedTileStorage(ms, ExtractUpperBlockSection(blocks));
 
-        WriteSparseNibbleStorage(ms, data, supportsAllFifteenPlane: false);
-        WriteEmptySparseNibbleStorage(ms, supportsAllFifteenPlane: false, fillWithFifteen: false);
+        WriteSparseNibbleStorage(ms, ExtractLowerNibbleSection(data), supportsAllFifteenPlane: false);
+        WriteSparseNibbleStorage(ms, ExtractUpperNibbleSection(data), supportsAllFifteenPlane: false);
 
-        WriteSparseNibbleStorage(ms, skyLight, supportsAllFifteenPlane: true);
-        WriteEmptySparseNibbleStorage(ms, supportsAllFifteenPlane: true, fillWithFifteen: true);
+        WriteSparseNibbleStorage(ms, ExtractLowerNibbleSection(skyLight), supportsAllFifteenPlane: true);
+        WriteSparseNibbleStorage(ms, ExtractUpperNibbleSection(skyLight), supportsAllFifteenPlane: true);
 
-        WriteSparseNibbleStorage(ms, blockLight, supportsAllFifteenPlane: true);
-        WriteEmptySparseNibbleStorage(ms, supportsAllFifteenPlane: true, fillWithFifteen: false);
+        WriteSparseNibbleStorage(ms, ExtractLowerNibbleSection(blockLight), supportsAllFifteenPlane: true);
+        WriteSparseNibbleStorage(ms, ExtractUpperNibbleSection(blockLight), supportsAllFifteenPlane: true);
 
         ms.Write(heightMap, 0, Math.Min(heightMap.Length, 256));
         if (heightMap.Length < 256)
@@ -252,16 +254,16 @@ public static class LceChunkPayloadCodec
             : 0L;
 
         byte[] lowerBlocks = ReadCompressedTileStorage(payload, ref offset);
-        _ = ReadCompressedTileStorage(payload, ref offset); // upper blocks, currently ignored
+        byte[] upperBlocks = ReadCompressedTileStorage(payload, ref offset);
 
         byte[] lowerData = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: false);
-        _ = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: false); // upper data
+        byte[] upperData = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: false);
 
         byte[] lowerSkyLight = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: true);
-        _ = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: true); // upper skylight
+        byte[] upperSkyLight = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: true);
 
         byte[] lowerBlockLight = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: true);
-        _ = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: true); // upper blocklight
+        byte[] upperBlockLight = ReadSparseNibbleStorage(payload, ref offset, supportsAllFifteenPlane: true);
 
         byte[] heightMap = ReadSizedBytes(payload, ref offset, 256);
         short terrainPopulatedFlags = ReadInt16BigEndian(payload, ref offset);
@@ -285,10 +287,10 @@ public static class LceChunkPayloadCodec
             new NbtInt("zPos", chunkZ),
             new NbtLong("LastUpdate", lastUpdate),
             new NbtLong("InhabitedTime", inhabitedTime),
-            new NbtByteArray("Blocks", lowerBlocks),
-            new NbtByteArray("Data", lowerData),
-            new NbtByteArray("SkyLight", lowerSkyLight),
-            new NbtByteArray("BlockLight", lowerBlockLight),
+            new NbtByteArray("Blocks", CombineBlockSections(lowerBlocks, upperBlocks)),
+            new NbtByteArray("Data", CombineNibbleSections(lowerData, upperData)),
+            new NbtByteArray("SkyLight", CombineNibbleSections(lowerSkyLight, upperSkyLight)),
+            new NbtByteArray("BlockLight", CombineNibbleSections(lowerBlockLight, upperBlockLight)),
             new NbtByteArray("HeightMap", heightMap),
             new NbtShort("TerrainPopulatedFlags", terrainPopulatedFlags),
             new NbtByteArray("Biomes", biomes),
@@ -573,6 +575,113 @@ public static class LceChunkPayloadCodec
             nibbleData[slot] = (byte)((nibbleData[slot] & 0xF0) | value);
         else
             nibbleData[slot] = (byte)((nibbleData[slot] & 0x0F) | (value << 4));
+    }
+
+    private static byte[] CombineBlockSections(byte[] lower, byte[] upper)
+    {
+        if (lower.Length == FullChunkBlocks)
+        {
+            return lower;
+        }
+
+        byte[] combined = new byte[FullChunkBlocks];
+        for (int xz = 0; xz < 256; xz++)
+        {
+            int lowerStart = xz * CompressedChunkSectionHeight;
+            int upperStart = xz * CompressedChunkSectionHeight;
+            int outStart = xz * 256;
+            Array.Copy(lower, lowerStart, combined, outStart, CompressedChunkSectionHeight);
+            Array.Copy(upper, upperStart, combined, outStart + CompressedChunkSectionHeight, CompressedChunkSectionHeight);
+        }
+
+        return combined;
+    }
+
+    private static byte[] CombineNibbleSections(byte[] lower, byte[] upper)
+    {
+        if (lower.Length == FullChunkNibbles)
+        {
+            return lower;
+        }
+
+        byte[] combined = new byte[FullChunkNibbles];
+        int nibbleHeight = CompressedChunkSectionHeight / 2;
+        for (int xz = 0; xz < 256; xz++)
+        {
+            int lowerStart = xz * nibbleHeight;
+            int upperStart = xz * nibbleHeight;
+            int outStart = xz * nibbleHeight * 2;
+            Array.Copy(lower, lowerStart, combined, outStart, nibbleHeight);
+            Array.Copy(upper, upperStart, combined, outStart + nibbleHeight, nibbleHeight);
+        }
+
+        return combined;
+    }
+
+    private static byte[] ExtractLowerBlockSection(byte[] fullBlocks)
+    {
+        if (fullBlocks.Length == BlocksPerSection)
+        {
+            return fullBlocks;
+        }
+
+        byte[] lower = new byte[BlocksPerSection];
+        for (int xz = 0; xz < 256; xz++)
+        {
+            Array.Copy(fullBlocks, xz * 256, lower, xz * CompressedChunkSectionHeight, CompressedChunkSectionHeight);
+        }
+
+        return lower;
+    }
+
+    private static byte[] ExtractLowerNibbleSection(byte[] fullNibbles)
+    {
+        if (fullNibbles.Length == NibblesPerSection)
+        {
+            return fullNibbles;
+        }
+
+        byte[] lower = new byte[NibblesPerSection];
+        int nibbleHeight = CompressedChunkSectionHeight / 2;
+        for (int xz = 0; xz < 256; xz++)
+        {
+            Array.Copy(fullNibbles, xz * nibbleHeight * 2, lower, xz * nibbleHeight, nibbleHeight);
+        }
+
+        return lower;
+    }
+
+    private static byte[] ExtractUpperBlockSection(byte[] fullBlocks)
+    {
+        if (fullBlocks.Length < FullChunkBlocks)
+        {
+            return new byte[BlocksPerSection];
+        }
+
+        byte[] upper = new byte[BlocksPerSection];
+        for (int xz = 0; xz < 256; xz++)
+        {
+            Array.Copy(fullBlocks, xz * 256 + CompressedChunkSectionHeight, upper, xz * CompressedChunkSectionHeight, CompressedChunkSectionHeight);
+        }
+
+        return upper;
+    }
+
+    private static byte[] ExtractUpperNibbleSection(byte[] fullNibbles)
+    {
+        if (fullNibbles.Length < FullChunkNibbles)
+        {
+            return new byte[NibblesPerSection];
+        }
+
+        byte[] upper = new byte[NibblesPerSection];
+        int nibbleHeight = CompressedChunkSectionHeight / 2;
+        for (int xz = 0; xz < 256; xz++)
+        {
+            Array.Copy(fullNibbles, xz * nibbleHeight * 2 + nibbleHeight, upper, xz * nibbleHeight, nibbleHeight);
+        }
+
+        return upper;
     }
 
     private static byte[] EnsureLength(byte[] input, int expectedLength)

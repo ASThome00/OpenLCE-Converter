@@ -10,8 +10,8 @@ namespace LceWorldConverter;
 /// </summary>
 public static class ChunkConverter
 {
-    public const int CHUNK_BLOCKS = 32768;
-    public const int CHUNK_NIBBLES = 16384;
+    public const int CHUNK_BLOCKS = 65536;
+    public const int CHUNK_NIBBLES = 32768;
     public const int HEIGHTMAP_SIZE = 256;
     public const int BIOMES_SIZE = 256;
 
@@ -260,18 +260,18 @@ public static class ChunkConverter
         foreach (var section in decodedSections)
         {
             int remappedSectionY = section.SectionY - sectionShift;
-            if (remappedSectionY < 0 || remappedSectionY > 7) continue;
+            if (remappedSectionY < 0 || remappedSectionY > 15) continue;
 
             int baseY = remappedSectionY * 16;
 
-            // Anvil section order: x + z*16 + y*256. Old chunk order: (x*16 + z)*128 + y.
+            // Anvil section order: x + z*16 + y*256. Old chunk order: (x*16 + z)*256 + y.
             for (int i = 0; i < 4096; i++)
             {
                 int x = i & 0x0F;
                 int z = (i >> 4) & 0x0F;
                 int y = (i >> 8) & 0x0F;
                 int globalY = baseY + y;
-                int flatIndex = ((x * 16) + z) * 128 + globalY;
+                int flatIndex = ((x * 16) + z) * 256 + globalY;
 
                 blocks[flatIndex] = section.Blocks[i];
 
