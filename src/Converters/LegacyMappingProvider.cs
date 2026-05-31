@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 
 namespace LceWorldConverter;
@@ -37,14 +38,31 @@ public sealed class LegacyMappingProvider
 
     private static IReadOnlyDictionary<string, string> LoadMappings(string fileName)
     {
-        string mapPath = Path.Combine(AppContext.BaseDirectory, "Resources", fileName);
-        if (!File.Exists(mapPath))
+        string? json = ReadEmbedded(fileName) ?? ReadFromDisk(fileName);
+        if (json == null)
             return new Dictionary<string, string>(StringComparer.Ordinal);
 
-        string json = File.ReadAllText(mapPath);
         Dictionary<string, string>? map = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
         return map == null
             ? new Dictionary<string, string>(StringComparer.Ordinal)
             : new Dictionary<string, string>(map, StringComparer.Ordinal);
+    }
+
+    private static string? ReadEmbedded(string fileName)
+    {
+        Assembly assembly = typeof(LegacyMappingProvider).Assembly;
+        string resourceName = $"LceWorldConverter.Resources.{fileName}";
+        using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+            return null;
+
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
+
+    private static string? ReadFromDisk(string fileName)
+    {
+        string mapPath = Path.Combine(AppContext.BaseDirectory, "Resources", fileName);
+        return File.Exists(mapPath) ? File.ReadAllText(mapPath) : null;
     }
 }

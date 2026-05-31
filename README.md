@@ -18,11 +18,14 @@
 
 Convert Java Edition worlds into Minecraft Legacy Console Edition (LCE) `saveData.ms`, and convert LCE saves back into Java world folders reversibly.
 
-## Workspace Role
+## What It Does
 
-- Use `saveconverter` to move Java Edition worlds onto an `LCEServer` instance or into a client save slot
-- Use it in reverse to recover LCE saves back to Java Edition world folders
-- Pair it with `LCEServer` and `LCEClient`/`LCEDebug` for end-to-end world testing
+- **Java → LCE:** packs a Java Edition world (folder or `.zip`) into a Windows64 LCE/TU19-compatible `saveData.ms`, recentred on the world spawn.
+- **LCE → Java:** unpacks an LCE `saveData.ms` back into a standard Java world folder for a chosen target version.
+- Converts the Overworld by default, with optional Nether and End.
+- Optionally carries over player data, and (Java → LCE) entity/tile data.
+- Detects the chunk format per chunk, so upgraded/mixed-version Java worlds convert without being treated as a single version.
+- Ships both a cross-platform desktop GUI and a CLI that share the same conversion core.
 
 ## Quick Start (Prebuilt)
 
@@ -47,14 +50,23 @@ Then:
 
 The GUI uses the same shared request model and validation as the CLI. The main behavior difference is the default LCE -> Java target version: the GUI starts at `1.21.11`, while the CLI defaults to `1.12.2` unless `--target-version` is supplied.
 
-### CLI (Prebuilt EXE)
+### CLI (Prebuilt)
+
+The CLI ships as `LceWorldConverter.exe` on Windows and `LceWorldConverter` (no extension) on macOS and Linux. The arguments are identical across platforms; only the invocation differs.
 
 ```powershell
+# Windows
 .\LceWorldConverter.exe --from java <java_world_folder_or_zip> <output_dir> [--world-type <classic|small|medium|large|flat|flat-small|flat-medium|flat-large>] [--all-dimensions] [--copy-players] [--preserve-entities]
 .\LceWorldConverter.exe --from lce <saveData.ms_path> <java_world_output_dir> [--all-dimensions] [--copy-players] [--target-version <version>]
 ```
 
-Common examples:
+```bash
+# macOS / Linux
+./LceWorldConverter --from java <java_world_folder_or_zip> <output_dir> [--world-type <classic|small|medium|large|flat|flat-small|flat-medium|flat-large>] [--all-dimensions] [--copy-players] [--preserve-entities]
+./LceWorldConverter --from lce <saveData.ms_path> <java_world_output_dir> [--all-dimensions] [--copy-players] [--target-version <version>]
+```
+
+Common examples (Windows):
 
 ```powershell
 # Folder input
@@ -65,6 +77,13 @@ Common examples:
 
 # LCE to Java
 .\LceWorldConverter.exe --from lce "D:\GameHDD\MySlot\saveData.ms" "C:\Users\You\Desktop\RecoveredJavaWorld" --all-dimensions --copy-players --target-version 1.21.11
+```
+
+The same commands on macOS/Linux use `./LceWorldConverter` and Unix paths, e.g.:
+
+```bash
+./LceWorldConverter --from java ~/worlds/MyWorld ~/converted/MySlot --world-type large --all-dimensions
+./LceWorldConverter --from lce ~/converted/MySlot/saveData.ms ~/RecoveredJavaWorld --target-version 1.21.11
 ```
 
 ## What You Get
@@ -128,10 +147,6 @@ Additional inspection and debugging commands are also available from the CLI:
 - Some modern blocks have no exact TU19 equivalent.
 - Nether portal linkage should be re-established in-game after conversion.
 
-## Technical Docs
-
-Full format notes, source references, and conversion internals are in [CONVERTER_DOCS.md](CONVERTER_DOCS.md).
-
 ## Project Layout
 
 - `LceWorldConverter.csproj`: shared core conversion library
@@ -142,7 +157,8 @@ Full format notes, source references, and conversion internals are in [CONVERTER
 - `tests/`: unit and integration-oriented regression coverage
 - `scripts/build-release.ps1`: Windows packaging script for the GUI exe, Inno Setup installer, multi-runtime CLI zips, and checksums
 - `scripts/build-macos-app.sh`: builds a self-contained macOS `OpenLCE Converter.app` bundle (arm64/x64) and zip
-- `.github/workflows/release.yml`: tag-triggered (`v*`) pipeline that builds macOS/Windows/Linux artifacts and publishes a GitHub Release
+- `.github/workflows/release.yml`: manually-triggered pipeline that computes the next version, tags `main`, builds macOS/Windows/Linux artifacts, and publishes a GitHub Release
+- `.github/workflows/ci.yml`: pull-request build + test checks (publishes nothing)
 
 ## Related Repositories
 
@@ -187,7 +203,7 @@ dotnet run --project ./LceWorldConverter.Cli/LceWorldConverter.Cli.csproj -- --f
 Create release artifacts locally:
 
 ```powershell
-# Windows: GUI exe + installer + CLI zips for all runtimes
+# Windows: GUI exe + installer + CLI zips for all runtimes (requires Inno Setup for the installer step)
 .\scripts\build-release.ps1 --version 2.3.0
 ```
 
@@ -196,4 +212,8 @@ Create release artifacts locally:
 bash scripts/build-macos-app.sh --version v2.3.0 --arch both
 ```
 
-Tagged pushes (`git tag v2.3.0 && git push origin v2.3.0`) trigger [`release.yml`](.github/workflows/release.yml), which builds the macOS `.app`, Windows installer/GUI/CLI, and Linux bundles, then publishes them to a GitHub Release with checksums.
+Releases are cut from the **Actions** tab by running the [`release.yml`](.github/workflows/release.yml) workflow manually (from `main`). It computes the next version, tags `main`, builds the macOS `.app`, Windows installer/GUI/CLI, and Linux bundles, then publishes them to a GitHub Release with checksums. Either pick a `bump` (`patch`/`minor`/`major`) or supply an exact `version` such as `v2.3.0`. With no existing tags, `bump` starts from `v0.0.0`, so for the first release supply the `version` input explicitly.
+
+## License
+
+Released under the [MIT License](LICENSE).

@@ -17,6 +17,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      Embed the mappings into the assembly so they are always available, even
+      for single-file publishes and packaging steps that copy only the exe.
+      Also keep an on-disk copy next to the output for dev/debug convenience.
+    -->
+    <EmbeddedResource Include="Resources\legacy_to_modern_block_mapping.json">
+      <LogicalName>LceWorldConverter.Resources.legacy_to_modern_block_mapping.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\legacy_to_modern_item_mapping.json">
+      <LogicalName>LceWorldConverter.Resources.legacy_to_modern_item_mapping.json</LogicalName>
+    </EmbeddedResource>
     <None Update="Resources\legacy_to_modern_block_mapping.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
