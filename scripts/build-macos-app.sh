@@ -7,8 +7,8 @@
 #   scripts/build-macos-app.sh --version v2.3.0 [--arch arm64|x64|both] [--config Release]
 #
 # Produces, under scripts/output/:
-#   LCE-Save-Converter-<version>-osx-arm64-app.zip   (contains "OpenLCE Converter.app")
-#   LCE-Save-Converter-<version>-osx-x64-app.zip
+#   OpenLCE-Converter-<version>-osx-arm64-app.zip   (contains "OpenLCE Converter.app")
+#   OpenLCE-Converter-<version>-osx-x64-app.zip
 #
 # Notes:
 #   - The bundle is unsigned. On first launch macOS Gatekeeper will block it;
@@ -70,7 +70,7 @@ build_one() {
   publish_dir="$(mktemp -d)"
   app_dir="$OUTPUT_DIR/$APP_DISPLAY_NAME.app"
   contents="$app_dir/Contents"
-  zip_path="$OUTPUT_DIR/LCE-Save-Converter-$VERSION_LABEL-$runtime-app.zip"
+  zip_path="$OUTPUT_DIR/OpenLCE-Converter-$VERSION_LABEL-$runtime-app.zip"
 
   echo ">> Publishing $runtime ($CONFIG) ..."
   dotnet publish "$GUI_PROJECT" \
@@ -143,7 +143,7 @@ done
 
 echo ""
 echo "Artifacts in $OUTPUT_DIR:"
-ls -1 "$OUTPUT_DIR"/LCE-Save-Converter-"$VERSION_LABEL"-osx-*-app.zip 2>/dev/null || true
+ls -1 "$OUTPUT_DIR"/OpenLCE-Converter-"$VERSION_LABEL"-osx-*-app.zip 2>/dev/null || true
 
 # TODO (signing/notarization, requires an Apple Developer ID certificate):
 #   codesign --deep --force --options runtime --timestamp \

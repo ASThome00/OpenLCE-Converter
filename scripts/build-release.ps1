@@ -169,12 +169,12 @@ if (-not $runtimeList -or $runtimeList.Count -eq 0) {
 $versionLabel = Normalize-Version $version
 $versionMetadata = Get-VersionMetadata $versionLabel
 $normalizedVersion = $versionMetadata.PackageVersion
-$publicArtifactBaseName = "LCE-Save-Converter-$versionLabel"
+$publicArtifactBaseName = "OpenLCE-Converter-$versionLabel"
 $stageRoot = Join-Path ([System.IO.Path]::GetTempPath()) "LceSaveConverter-build"
 $stageStamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $stagingDir = Join-Path $stageRoot "$publicArtifactBaseName-$stageStamp"
-$guiArtifactZipPath = Join-Path $outputDir "LCE-Save-Converter-GUI-$versionLabel-win-x64.zip"
-$installerBaseName = "LCE-Save-Converter-$versionLabel-setup"
+$guiArtifactZipPath = Join-Path $outputDir "OpenLCE-Converter-GUI-$versionLabel-win-x64.zip"
+$installerBaseName = "OpenLCE-Converter-$versionLabel-setup"
 $installerExePath = Join-Path $outputDir "$installerBaseName.exe"
 $isccPath = Get-IsccPath
 
@@ -194,7 +194,7 @@ if ($clean) {
     }
 
     Get-ChildItem $outputDir -ErrorAction SilentlyContinue | ForEach-Object {
-        if ($_.Name -like "LCE-Save-Converter*-$versionLabel*") {
+        if ($_.Name -like "OpenLCE-Converter*-$versionLabel*") {
             Remove-Item -LiteralPath $_.FullName -Recurse -Force
         }
     }
