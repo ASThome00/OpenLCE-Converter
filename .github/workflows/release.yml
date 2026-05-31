@@ -1,28 +1,105 @@
 name: Release
 
+# Manually-triggered, self-contained release workflow. Cuts a new release off
+# of main: computes the next version (auto-bumped from the latest v* tag),
+# tags main's HEAD, builds all platforms from that tag, and publishes a
+# GitHub Release.
+
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version tag to build (e.g. v2.3.0)'
+      bump:
+        description: 'Which part of the version to bump (ignored if "version" is set)'
+        type: choice
         required: true
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      version:
+        description: 'Optional exact version to release, e.g. v2.3.0 (overrides bump)'
+        required: false
 
 permissions:
   contents: write
 
-env:
-  # Tag name on tag pushes, or the manual input for workflow_dispatch.
-  VERSION: ${{ github.event.inputs.version || github.ref_name }}
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
+  prepare:
+    name: Compute version and tag main
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: "Guard: must run from main"
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::This workflow must be run from the 'main' branch (got ${{ github.ref }})."
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need full history + tags to compute the next version
+
+      - name: Compute next version
+        id: version
+        run: |
+          set -euo pipefail
+          override='${{ github.event.inputs.version }}'
+          if [ -n "$override" ]; then
+            case "$override" in
+              v[0-9]*.[0-9]*.[0-9]*) ;;
+              *) echo "::error::version override must look like vMAJOR.MINOR.PATCH (got '$override')."; exit 1 ;;
+            esac
+            version="$override"
+          else
+            latest=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+            latest="${latest:-v0.0.0}"
+            base="${latest#v}"
+            major="${base%%.*}"
+            rest="${base#*.}"
+            minor="${rest%%.*}"
+            patch="${rest##*.}"
+            case '${{ github.event.inputs.bump }}' in
+              major) major=$((major + 1)); minor=0; patch=0 ;;
+              minor) minor=$((minor + 1)); patch=0 ;;
+              patch) patch=$((patch + 1)) ;;
+            esac
+            version="v${major}.${minor}.${patch}"
+            echo "Latest tag: $latest -> bumped ${{ github.event.inputs.bump }} -> $version"
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            echo "::error::Tag $version already exists."
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing $version"
+
+      - name: Tag main and push
+        run: |
+          set -euo pipefail
+          version='${{ steps.version.outputs.version }}'
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$version" -m "Release $version"
+          git push origin "$version"
+
   macos:
     name: macOS .app bundles
+    needs: prepare
     runs-on: macos-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.version }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -36,9 +113,14 @@ jobs:
 
   windows:
     name: Windows GUI + installer + CLI
+    needs: prepare
     runs-on: windows-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.version }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -57,9 +139,14 @@ jobs:
 
   linux:
     name: Linux GUI bundle
+    needs: prepare
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.version }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -81,8 +168,10 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    needs: [macos, windows, linux]
+    needs: [prepare, macos, windows, linux]
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - uses: actions/download-artifact@v4
         with:
