@@ -3,17 +3,17 @@
 > Open, cross-platform Java ⇄ Legacy Console Edition world converter — Windows · macOS · Linux.
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/veroxsity/LCE-Save-Converter?style=for-the-badge" alt="License" />
-  <img src="https://img.shields.io/github/last-commit/veroxsity/LCE-Save-Converter?style=for-the-badge" alt="Last Commit" />
-  <img src="https://img.shields.io/github/repo-size/veroxsity/LCE-Save-Converter?style=for-the-badge" alt="Repo Size" />
+  <img src="https://img.shields.io/github/license/ASThome00/OpenLCE-Converter?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/github/last-commit/ASThome00/OpenLCE-Converter?style=for-the-badge" alt="Last Commit" />
+  <img src="https://img.shields.io/github/repo-size/ASThome00/OpenLCE-Converter?style=for-the-badge" alt="Repo Size" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-8-512BD4?style=flat-square&logo=dotnet" alt=".NET 8" />
   <img src="https://img.shields.io/badge/CLI-Windows%20%7C%20Linux%20%7C%20macOS-2F855A?style=flat-square" alt="CLI cross-platform" />
   <img src="https://img.shields.io/badge/GUI-Windows%20%7C%20macOS%20%7C%20Linux-512BD4?style=flat-square&logo=avalonia" alt="GUI cross-platform" />
-  <img src="https://img.shields.io/github/v/release/veroxsity/LCE-Save-Converter?style=flat-square&label=Release" alt="Release" />
-  <img src="https://img.shields.io/github/downloads/veroxsity/LCE-Save-Converter/total?style=flat-square&label=Downloads" alt="Downloads" />
+  <img src="https://img.shields.io/github/v/release/ASThome00/OpenLCE-Converter?style=flat-square&label=Release" alt="Release" />
+  <img src="https://img.shields.io/github/downloads/ASThome00/OpenLCE-Converter/total?style=flat-square&label=Downloads" alt="Downloads" />
 </p>
 
 Convert Java Edition worlds into Minecraft Legacy Console Edition (LCE) `saveData.ms`, and convert LCE saves back into Java world folders reversibly.
@@ -26,7 +26,7 @@ Convert Java Edition worlds into Minecraft Legacy Console Edition (LCE) `saveDat
 
 ## Quick Start (Prebuilt)
 
-1. Download the latest release from [GitHub Releases](https://github.com/veroxsity/LCE-Save-Converter/releases).
+1. Download the latest release from [GitHub Releases](https://github.com/ASThome00/OpenLCE-Converter/releases).
 2. Extract the zip.
 3. Use the GUI app for the easiest workflow, or use the CLI executable.
 
@@ -160,8 +160,8 @@ If you only want to use releases, you can ignore this section.
 Requires [.NET 8 SDK](https://dotnet.microsoft.com/download).
 
 ```bash
-git clone https://github.com/veroxsity/LCE-Save-Converter.git
-cd LCE-Save-Converter
+git clone https://github.com/ASThome00/OpenLCE-Converter.git
+cd OpenLCE-Converter
 dotnet build ./LceWorldConverter.sln -c Release
 dotnet test ./tests/LceWorldConverter.Tests.csproj -c Release
 ```
