@@ -51,6 +51,11 @@ jobs:
           set -euo pipefail
           override='${{ github.event.inputs.version }}'
           if [ -n "$override" ]; then
+            # Accept the version with or without a leading 'v' (e.g. 2.3.0 or v2.3.0).
+            case "$override" in
+              v*) ;;
+              *) override="v$override" ;;
+            esac
             case "$override" in
               v[0-9]*.[0-9]*.[0-9]*) ;;
               *) echo "::error::version override must look like vMAJOR.MINOR.PATCH (got '$override')."; exit 1 ;;
