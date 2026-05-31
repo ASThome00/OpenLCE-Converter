@@ -233,7 +233,7 @@ try {
             "- Run the executable directly from this folder."
         )
 
-        $runtimeZipPath = Join-Path $outputDir "$publicArtifactBaseName-$runtime.zip"
+        $runtimeZipPath = Join-Path $outputDir "$publicArtifactBaseName-$runtime-cli.zip"
         New-ZipFromDirectory $runtimePackageDir $runtimeZipPath
         $builtArtifacts.Add($runtimeZipPath)
     }

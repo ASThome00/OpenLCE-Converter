@@ -30,8 +30,10 @@ Convert Java Edition worlds into Minecraft Legacy Console Edition (LCE) `saveDat
 ## Quick Start (Prebuilt)
 
 1. Download the latest release from [GitHub Releases](https://github.com/ASThome00/OpenLCE-Converter/releases).
-2. Extract the zip.
-3. Use the GUI app for the easiest workflow, or use the CLI executable.
+2. Pick the right asset for what you want:
+   - **Desktop app (recommended):** the `*-app.zip` (macOS/Linux) or `OpenLCE-Converter-GUI-*-win-x64.zip` / `*-setup.exe` (Windows).
+   - **Command line:** the `*-cli.zip` for your platform.
+3. Extract it and run the app or CLI executable.
 
 ### GUI (Recommended)
 
