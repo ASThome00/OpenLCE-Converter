@@ -224,7 +224,7 @@ try {
 
         $cliName = Get-ExecutableNameForRuntime "LceWorldConverter" $runtime
         Copy-Item -Path $cliPath -Destination (Join-Path $runtimePackageDir $cliName) -Force
-        New-PortableReadme (Join-Path $runtimePackageDir "README.txt") "LCE Save Converter CLI" $versionLabel @(
+        New-PortableReadme (Join-Path $runtimePackageDir "README.txt") "OpenLCE Converter CLI" $versionLabel @(
             ""
             "Files:"
             "- $cliName : Command-line interface"
@@ -257,7 +257,7 @@ try {
     }
 
     Copy-Item -Path $guiExe -Destination (Join-Path $guiPackageDir "LceWorldConverter.Gui.exe") -Force
-    New-PortableReadme (Join-Path $guiPackageDir "README.txt") "LCE Save Converter GUI" $versionLabel @(
+    New-PortableReadme (Join-Path $guiPackageDir "README.txt") "OpenLCE Converter GUI" $versionLabel @(
         ""
         "Files:"
         "- LceWorldConverter.Gui.exe : Desktop GUI"
@@ -268,7 +268,7 @@ try {
 
     Copy-Item -Path $guiExe -Destination (Join-Path $installerRoot "LceWorldConverter.Gui.exe") -Force
     Copy-Item -Path $winCliExe -Destination (Join-Path $installerRoot "LceWorldConverter.exe") -Force
-    New-PortableReadme (Join-Path $installerRoot "README.txt") "LCE Save Converter" $versionLabel @(
+    New-PortableReadme (Join-Path $installerRoot "README.txt") "OpenLCE Converter" $versionLabel @(
         ""
         "Files:"
         "- LceWorldConverter.Gui.exe : Desktop GUI"

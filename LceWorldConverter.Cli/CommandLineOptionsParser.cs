@@ -31,7 +31,7 @@ public static class CommandLineOptionsParser
             "Legacy Java->LCE positional mode still works:",
             "  LceWorldConverter <java_world_folder_or_zip> [output_dir] [flags...]",
             string.Empty,
-            "Use the Windows GUI project if you want a desktop app for selecting a world zip and output folder.",
+            "Use the desktop GUI (Windows, macOS, or Linux) if you want an app for selecting a world zip and output folder.",
         ];
     }
 

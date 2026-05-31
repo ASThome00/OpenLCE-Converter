@@ -1,4 +1,6 @@
-# LCE Save Converter
+# OpenLCE Converter
+
+> Open, cross-platform Java ⇄ Legacy Console Edition world converter — Windows · macOS · Linux.
 
 <p align="center">
   <img src="https://img.shields.io/github/license/veroxsity/LCE-Save-Converter?style=for-the-badge" alt="License" />
@@ -9,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-8-512BD4?style=flat-square&logo=dotnet" alt=".NET 8" />
   <img src="https://img.shields.io/badge/CLI-Windows%20%7C%20Linux%20%7C%20macOS-2F855A?style=flat-square" alt="CLI cross-platform" />
-  <img src="https://img.shields.io/badge/GUI-Windows-0078D6?style=flat-square&logo=windows" alt="GUI Windows" />
+  <img src="https://img.shields.io/badge/GUI-Windows%20%7C%20macOS%20%7C%20Linux-512BD4?style=flat-square&logo=avalonia" alt="GUI cross-platform" />
   <img src="https://img.shields.io/github/v/release/veroxsity/LCE-Save-Converter?style=flat-square&label=Release" alt="Release" />
   <img src="https://img.shields.io/github/downloads/veroxsity/LCE-Save-Converter/total?style=flat-square&label=Downloads" alt="Downloads" />
 </p>
@@ -30,11 +32,18 @@ Convert Java Edition worlds into Minecraft Legacy Console Edition (LCE) `saveDat
 
 ### GUI (Recommended)
 
-1. Open `LceWorldConverter.Gui.exe`.
-2. Choose `Java -> LCE` or `LCE -> Java`.
-3. Select a Java world folder or `.zip`, or select an existing `saveData.ms`.
-4. Choose an output folder and any extra options.
-5. Review the summary and click `Convert`.
+The desktop GUI is a cross-platform [Avalonia](https://avaloniaui.net/) app that runs on Windows, macOS, and Linux.
+
+- **Windows:** open `LceWorldConverter.Gui.exe` (or install via the setup installer).
+- **macOS:** unzip the `*-osx-<arch>-app.zip` and open `OpenLCE Converter.app`. The bundle is currently unsigned, so on first launch right-click the app and choose **Open** (or run `xattr -dr com.apple.quarantine "OpenLCE Converter.app"`) to clear Gatekeeper.
+- **Linux:** extract the `*-linux-x64-app.tar.gz` and run `./LceWorldConverter.Gui`.
+
+Then:
+
+1. Choose `Java -> LCE` or `LCE -> Java`.
+2. Select a Java world folder or `.zip`, or select an existing `saveData.ms`.
+3. Choose an output folder and any extra options.
+4. Review the summary and click `Convert`.
 
 The GUI uses the same shared request model and validation as the CLI. The main behavior difference is the default LCE -> Java target version: the GUI starts at `1.21.11`, while the CLI defaults to `1.12.2` unless `--target-version` is supplied.
 
@@ -127,11 +136,13 @@ Full format notes, source references, and conversion internals are in [CONVERTER
 
 - `LceWorldConverter.csproj`: shared core conversion library
 - `LceWorldConverter.Cli/`: command-line app that publishes as `LceWorldConverter.exe` in release packages
-- `LceWorldConverter.Gui/`: Windows-only WPF desktop GUI
+- `LceWorldConverter.Gui/`: cross-platform Avalonia desktop GUI (Windows, macOS, Linux)
 - `src/Requests/`: shared request model, defaults, and validation
 - `src/Services/`: focused conversion-side services
 - `tests/`: unit and integration-oriented regression coverage
-- `scripts/build-release.ps1`: multi-runtime packaging script for zip assets, installer, and checksums
+- `scripts/build-release.ps1`: Windows packaging script for the GUI exe, Inno Setup installer, multi-runtime CLI zips, and checksums
+- `scripts/build-macos-app.sh`: builds a self-contained macOS `OpenLCE Converter.app` bundle (arm64/x64) and zip
+- `.github/workflows/release.yml`: tag-triggered (`v*`) pipeline that builds macOS/Windows/Linux artifacts and publishes a GitHub Release
 
 ## Related Repositories
 
@@ -161,20 +172,28 @@ Build GUI project:
 dotnet build ./LceWorldConverter.Gui/LceWorldConverter.Gui.csproj
 ```
 
-Run GUI from source:
+Run GUI from source (any OS):
 
-```powershell
-dotnet run --project .\LceWorldConverter.Gui\LceWorldConverter.Gui.csproj
+```bash
+dotnet run --project ./LceWorldConverter.Gui/LceWorldConverter.Gui.csproj
 ```
 
-Run CLI from source:
+Run CLI from source (any OS):
 
-```powershell
-dotnet run --project .\LceWorldConverter.Cli\LceWorldConverter.Cli.csproj -- --from java <java_world_folder_or_zip> <output_dir>
+```bash
+dotnet run --project ./LceWorldConverter.Cli/LceWorldConverter.Cli.csproj -- --from java <java_world_folder_or_zip> <output_dir>
 ```
 
 Create release artifacts locally:
 
 ```powershell
+# Windows: GUI exe + installer + CLI zips for all runtimes
 .\scripts\build-release.ps1 --version 2.3.0
 ```
+
+```bash
+# macOS: self-contained .app bundle(s) + zip
+bash scripts/build-macos-app.sh --version v2.3.0 --arch both
+```
+
+Tagged pushes (`git tag v2.3.0 && git push origin v2.3.0`) trigger [`release.yml`](.github/workflows/release.yml), which builds the macOS `.app`, Windows installer/GUI/CLI, and Linux bundles, then publishes them to a GitHub Release with checksums.

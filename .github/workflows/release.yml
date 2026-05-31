@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to build (e.g. v2.3.0)'
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  # Tag name on tag pushes, or the manual input for workflow_dispatch.
+  VERSION: ${{ github.event.inputs.version || github.ref_name }}
+
+jobs:
+  macos:
+    name: macOS .app bundles
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build .app bundles (arm64 + x64)
+        run: bash scripts/build-macos-app.sh --version "$VERSION" --arch both
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: scripts/output/*-app.zip
+          if-no-files-found: error
+
+  windows:
+    name: Windows GUI + installer + CLI
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build release (GUI, installer, CLI for all runtimes)
+        shell: pwsh
+        run: ./scripts/build-release.ps1 --version "$env:VERSION"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            scripts/output/*.zip
+            scripts/output/*.exe
+          if-no-files-found: error
+
+  linux:
+    name: Linux GUI bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Publish self-contained Linux GUI
+        run: |
+          short="${VERSION#v}"
+          dotnet publish LceWorldConverter.Gui/LceWorldConverter.Gui.csproj \
+            -c Release -r linux-x64 --self-contained true \
+            -p:PublishSingleFile=false -p:DebugType=None -p:DebugSymbols=false \
+            -p:Version="$short" -p:InformationalVersion="$VERSION" \
+            -o publish/linux-gui
+          mkdir -p out
+          tar -C publish/linux-gui -czf "out/LCE-Save-Converter-$VERSION-linux-x64-app.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: out/*.tar.gz
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: [macos, windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Collect artifacts and generate checksums
+        run: |
+          mkdir -p dist
+          find artifacts -type f \( -name '*.zip' -o -name '*.exe' -o -name '*.tar.gz' \) \
+            -exec cp -f {} dist/ \;
+          ( cd dist && sha256sum * > SHA256SUMS.txt )
+          echo "Release files:"
+          ls -1 dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: ${{ env.VERSION }}
+          generate_release_notes: true
+          files: dist/*

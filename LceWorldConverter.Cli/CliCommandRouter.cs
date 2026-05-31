@@ -9,7 +9,7 @@ internal static class CliCommandRouter
         if (InspectorCommandRouter.TryExecute(args, out int inspectorExitCode))
             return inspectorExitCode;
 
-        Console.WriteLine("=== LCE World Converter ===");
+        Console.WriteLine("=== OpenLCE Converter ===");
         Console.WriteLine("Converts Java Edition worlds <-> Minecraft Legacy Console Edition saveData.ms files.\n");
 
         if (args.Length < 1)

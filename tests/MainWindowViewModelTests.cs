@@ -8,14 +8,16 @@ public sealed class MainWindowViewModelTests
     [Fact]
     public void AutoFillJavaOutput_UsesSharedDefaultDirectoryRule()
     {
+        // Build paths with Path.Combine so the test uses native separators on any OS.
+        string desktop = Path.Combine(Path.GetTempPath(), "Desktop");
         var viewModel = new MainWindowViewModel
         {
-            JavaInputPath = @"C:\Worlds\Milky.zip",
+            JavaInputPath = Path.Combine(Path.GetTempPath(), "Worlds", "Milky.zip"),
         };
 
-        viewModel.AutoFillJavaOutput(@"D:\Desktop");
+        viewModel.AutoFillJavaOutput(desktop);
 
-        Assert.Equal(Path.Combine(@"D:\Desktop", "Milky"), viewModel.JavaOutputPath);
+        Assert.Equal(Path.Combine(desktop, "Milky"), viewModel.JavaOutputPath);
     }
 
     [Fact]

@@ -14,7 +14,7 @@
   #define MyInstallerBaseName "LceWorldConverter-setup"
 #endif
 
-#define MyAppName "LCE Save Converter"
+#define MyAppName "OpenLCE Converter"
 #define MyPublisher "BanditVault"
 #define MyGuiExe "LceWorldConverter.Gui.exe"
 #define MyCliExe "LceWorldConverter.exe"
@@ -24,7 +24,7 @@ AppId={{7FD3A1A8-BA02-493D-96B5-14F9A9DA3B57}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyPublisher}
-DefaultDirName={localappdata}\Programs\LCE Save Converter
+DefaultDirName={localappdata}\Programs\OpenLCE Converter
 DefaultGroupName={#MyAppName}
 OutputDir={#MyOutputDir}
 OutputBaseFilename={#MyInstallerBaseName}

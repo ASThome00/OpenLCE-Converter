@@ -1,0 +1,348 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LceWorldConverter.Gui"
+        x:Class="LceWorldConverter.Gui.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="OpenLCE Converter"
+        Width="1480"
+        Height="940"
+        MinWidth="1240"
+        MinHeight="820"
+        Background="#F2F6F3"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#D6E0DA"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#15745C"/>
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#E5F1EC"/>
+        <SolidColorBrush x:Key="TitleBrush" Color="#18352D"/>
+        <SolidColorBrush x:Key="BodyBrush" Color="#4D6059"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#6C7C76"/>
+        <SolidColorBrush x:Key="StepDotBrush" Color="#C8D4CF"/>
+        <SolidColorBrush x:Key="LogBackgroundBrush" Color="#0F1F1B"/>
+        <SolidColorBrush x:Key="LogTextBrush" Color="#CDE8DF"/>
+    </Window.Resources>
+
+    <Window.Styles>
+        <!-- Primary button -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1A8268"/>
+        </Style>
+        <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#125F4B"/>
+        </Style>
+
+        <!-- Secondary button -->
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource TitleBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,9"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.secondary /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style Selector="Button.secondary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#F7F9F8"/>
+        </Style>
+        <Style Selector="Button.secondary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#E9EDEA"/>
+        </Style>
+
+        <!-- Card -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="24,20"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="BoxShadow" Value="0 4 12 0 #08000000"/>
+        </Style>
+
+        <!-- Text styles -->
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TitleBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <Style Selector="TextBlock.body">
+            <Setter Property="Foreground" Value="{StaticResource BodyBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="{StaticResource TitleBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Path text box -->
+        <Style Selector="TextBox.path">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TitleBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="28,24" RowDefinitions="Auto,Auto,*,Auto">
+
+        <Grid Grid.Row="0" Margin="0,0,0,20" ColumnDefinitions="*,Auto">
+            <StackPanel>
+                <TextBlock Text="OpenLCE Converter" Foreground="{StaticResource MutedBrush}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <TextBlock x:Name="StepTitleText" Text="Choose Direction" Foreground="{StaticResource TitleBrush}" FontSize="18" FontWeight="Bold" Margin="0,0,0,4"/>
+                <TextBlock x:Name="StepSubtitleText" Text="Choose what kind of conversion you want to run." Classes="body"/>
+            </StackPanel>
+            <Border Grid.Column="1" Padding="10,5" Background="{StaticResource AccentSoftBrush}" CornerRadius="8" VerticalAlignment="Top">
+                <TextBlock Text="Cross-Platform" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold"/>
+            </Border>
+        </Grid>
+
+        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,18">
+            <StackPanel Orientation="Horizontal">
+                <Border x:Name="Step0Badge" Width="30" Height="30" CornerRadius="15" Background="{StaticResource StepDotBrush}" Margin="0,0,10,0">
+                    <TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TitleBrush}"/>
+                </Border>
+                <TextBlock Text="Direction" VerticalAlignment="Center" Foreground="{StaticResource TitleBrush}" FontWeight="SemiBold"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Border x:Name="Step1Badge" Width="30" Height="30" CornerRadius="15" Background="{StaticResource StepDotBrush}" Margin="0,0,10,0">
+                    <TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TitleBrush}"/>
+                </Border>
+                <TextBlock Text="Options" VerticalAlignment="Center" Foreground="{StaticResource TitleBrush}" FontWeight="SemiBold"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Border x:Name="Step2Badge" Width="30" Height="30" CornerRadius="15" Background="{StaticResource StepDotBrush}" Margin="0,0,10,0">
+                    <TextBlock Text="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource TitleBrush}"/>
+                </Border>
+                <TextBlock Text="Convert" VerticalAlignment="Center" Foreground="{StaticResource TitleBrush}" FontWeight="SemiBold"/>
+            </StackPanel>
+        </UniformGrid>
+
+        <Grid Grid.Row="2">
+            <ScrollViewer x:Name="Step0View" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <TextBlock Text="Direction" Classes="sectionTitle"/>
+                            <TextBlock Text="Pick the conversion direction first. The next step adapts to the fields that matter for that choice." Classes="body" Margin="0,0,0,12"/>
+                            <TextBlock Text="You can switch directions any time before converting." Classes="body"/>
+                        </StackPanel>
+                    </Border>
+                    <Grid ColumnDefinitions="*,24,*">
+                        <Border x:Name="JavaDirectionCard" Grid.Column="0" Classes="card" Cursor="Hand" Tapped="JavaDirectionCard_Tapped">
+                            <StackPanel>
+                                <TextBlock Text="Java -&gt; LCE" Foreground="{StaticResource TitleBrush}" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <TextBlock Text="Convert a Java Edition world folder or zip into a legacy saveData.ms package." Classes="body" Margin="0,0,0,12"/>
+                                <TextBlock Text="Best when your source is a Java save folder or backup zip." Classes="hint" Margin="0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border x:Name="LceDirectionCard" Grid.Column="2" Classes="card" Cursor="Hand" Tapped="LceDirectionCard_Tapped">
+                            <StackPanel>
+                                <TextBlock Text="LCE -&gt; Java" Foreground="{StaticResource TitleBrush}" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <TextBlock Text="Extract a legacy save package into a standard Java Edition world folder." Classes="body" Margin="0,0,0,12"/>
+                                <TextBlock Text="Best when your source is an existing saveData.ms package." Classes="hint" Margin="0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="Step1View" VerticalScrollBarVisibility="Auto" IsVisible="False">
+                <StackPanel>
+                    <StackPanel x:Name="JavaStepPanel">
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Source And Output" Classes="sectionTitle"/>
+                                <TextBlock Text="Choose a Java world source and the folder where the converted saveData.ms should be written." Classes="body" Margin="0,0,0,16"/>
+
+                                <StackPanel Margin="0,0,0,18">
+                                    <TextBlock Text="Java World" Classes="label"/>
+                                    <TextBlock Text="Select a world folder or a .zip backup." Classes="hint"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox x:Name="JavaInputTextBox"
+                                                 Text="{Binding JavaInputPath}"
+                                                 Classes="path"
+                                                 DragDrop.AllowDrop="True"/>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <Button Content="Folder" Classes="secondary" Margin="0,0,12,0" Click="BrowseJavaFolderButton_Click"/>
+                                            <Button Content="Zip" Classes="secondary" Click="BrowseJavaZipButton_Click"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock Text="Output Folder" Classes="label"/>
+                                    <TextBlock Text="Choose the folder that should receive the converted package." Classes="hint"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox x:Name="JavaOutputTextBox"
+                                                 Text="{Binding JavaOutputPath}"
+                                                 Classes="path"
+                                                 DragDrop.AllowDrop="True"/>
+                                        <Button Grid.Column="1" Content="Choose Folder" Classes="secondary" Click="BrowseJavaOutputButton_Click"/>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Options" Classes="sectionTitle"/>
+                                <TextBlock Text="Match the target legacy world type, then decide which extra data should be carried over." Classes="body" Margin="0,0,0,16"/>
+
+                                <Grid Margin="0,0,0,18" ColumnDefinitions="320,*">
+                                    <StackPanel Margin="0,0,16,0">
+                                        <TextBlock Text="World Type" Classes="label"/>
+                                        <TextBlock Text="Controls the target world bounds and whether the result is flat." Classes="hint" Margin="0"/>
+                                    </StackPanel>
+                                    <ComboBox x:Name="JavaWorldTypeComboBox"
+                                              Grid.Column="1"
+                                              Width="240"
+                                              HorizontalAlignment="Left"
+                                              ItemsSource="{Binding WorldTypeKeys}"
+                                              SelectedItem="{Binding JavaWorldType}"/>
+                                </Grid>
+
+                                <WrapPanel>
+                                    <CheckBox x:Name="JavaAllDimensionsCheckBox" Content="Convert Nether and End" Margin="0,0,18,10" IsChecked="{Binding JavaAllDimensions}"/>
+                                    <CheckBox x:Name="JavaCopyPlayersCheckBox" Content="Copy numeric player data" Margin="0,0,18,10" IsChecked="{Binding JavaCopyPlayers}"/>
+                                    <CheckBox x:Name="JavaPreserveEntitiesCheckBox" Content="Preserve entities and tile data" Margin="0,0,18,10" IsChecked="{Binding JavaPreserveEntities}"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel x:Name="LceStepPanel" IsVisible="False">
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Source And Output" Classes="sectionTitle"/>
+                                <TextBlock Text="Choose the source saveData.ms package and the folder where the Java world should be exported." Classes="body" Margin="0,0,0,16"/>
+
+                                <StackPanel Margin="0,0,0,18">
+                                    <TextBlock Text="saveData.ms" Classes="label"/>
+                                    <TextBlock Text="Drop or browse for the legacy save package." Classes="hint"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox x:Name="LceInputTextBox"
+                                                 Text="{Binding LceInputPath}"
+                                                 Classes="path"
+                                                 DragDrop.AllowDrop="True"/>
+                                        <Button Grid.Column="1" Content="Browse Save" Classes="secondary" Click="BrowseLceInputButton_Click"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock Text="Output Folder" Classes="label"/>
+                                    <TextBlock Text="Choose the folder that should receive the Java world." Classes="hint"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox x:Name="LceOutputTextBox"
+                                                 Text="{Binding LceOutputPath}"
+                                                 Classes="path"
+                                                 DragDrop.AllowDrop="True"/>
+                                        <Button Grid.Column="1" Content="Choose Folder" Classes="secondary" Click="BrowseLceOutputButton_Click"/>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Options" Classes="sectionTitle"/>
+                                <TextBlock Text="Choose your target Java Edition version and select whether to export additional dimensions and player data." Classes="body" Margin="0,0,0,16"/>
+
+                                <Grid Margin="0,0,0,18" ColumnDefinitions="320,*">
+                                    <StackPanel Margin="0,0,16,0">
+                                        <TextBlock Text="Target Version" Classes="label"/>
+                                        <TextBlock Text="The minimum Java Edition version that will run this world." Classes="hint" Margin="0"/>
+                                    </StackPanel>
+                                    <AutoCompleteBox x:Name="LceTargetVersionBox"
+                                                     Grid.Column="1"
+                                                     Width="240"
+                                                     HorizontalAlignment="Left"
+                                                     FilterMode="Contains"
+                                                     ItemsSource="{Binding TargetVersions}"
+                                                     Text="{Binding LceTargetVersion}"/>
+                                </Grid>
+
+                                <WrapPanel>
+                                    <CheckBox x:Name="LceAllDimensionsCheckBox" Content="Export Nether and End" Margin="0,0,18,10" IsChecked="{Binding LceAllDimensions}"/>
+                                    <CheckBox x:Name="LceCopyPlayersCheckBox" Content="Export players/*.dat" Margin="0,0,18,10" IsChecked="{Binding LceCopyPlayers}"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid x:Name="Step2View" IsVisible="False" RowDefinitions="Auto,Auto,*">
+                <Border Grid.Row="0" Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="Review" Classes="sectionTitle"/>
+                        <TextBlock Text="Double-check the summary below before you start the conversion." Classes="body" Margin="0,0,0,16"/>
+                        <TextBlock x:Name="ReviewSummaryText" Text="{Binding ReviewSummary}" Classes="body"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="Run Conversion" Classes="sectionTitle"/>
+                        <TextBlock Text="Start the conversion when you are happy with the current setup." Classes="body" Margin="0,0,0,16"/>
+                        <WrapPanel>
+                            <Button x:Name="ConvertButton" Content="{Binding ConvertButtonText}" Classes="primary" Margin="0,0,12,0" Click="ConvertButton_Click"/>
+                            <TextBlock x:Name="StatusText" Text="Ready" Foreground="{StaticResource AccentBrush}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,8,0,0"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="2" Classes="card" Margin="0">
+                    <Grid RowDefinitions="Auto,Auto,*">
+                        <TextBlock Grid.Row="0" Text="Activity Log" Classes="sectionTitle"/>
+                        <TextBlock Grid.Row="1" Text="Live converter output will appear here while the job runs." Classes="body" Margin="0,0,0,12"/>
+                        <Border Grid.Row="2" Background="{StaticResource LogBackgroundBrush}" CornerRadius="10" Padding="14">
+                            <TextBox x:Name="LogTextBox" Background="Transparent" BorderThickness="0" Foreground="{StaticResource LogTextBrush}" FontFamily="Cascadia Code,Menlo,Consolas,monospace" FontSize="13" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,16,0,0" ColumnDefinitions="*,Auto,Auto">
+            <Button x:Name="BackButton" Grid.Column="1" Content="Back" Classes="secondary" Margin="0,0,12,0" IsVisible="False" Click="BackButton_Click"/>
+            <Button x:Name="NextButton" Grid.Column="2" Content="Next" Classes="primary" Click="NextButton_Click"/>
+        </Grid>
+    </Grid>
+</Window>
