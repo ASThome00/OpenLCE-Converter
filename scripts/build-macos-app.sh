@@ -129,6 +129,15 @@ $icon_entry
 </plist>
 PLIST
 
+  # Ad-hoc sign the fully-assembled bundle. .NET only signs the apphost, so
+  # without this the bundle's seal excludes Info.plist and resources; macOS
+  # then treats the downloaded (quarantined) app as "damaged" with no
+  # "Open Anyway" option. An ad-hoc signature seals the whole bundle, so the
+  # unsigned app falls back to the normal Gatekeeper prompt instead.
+  echo ">> Ad-hoc signing $app_dir ..."
+  codesign --force --deep --sign - "$app_dir"
+  codesign --verify --strict "$app_dir"
+
   echo ">> Zipping $zip_path ..."
   rm -f "$zip_path"
   ditto -c -k --sequesterRsrc --keepParent "$app_dir" "$zip_path"
